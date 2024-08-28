@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clicker Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background-color: white;
+        }
+
+        /* Left Sidebar */
+        #left-sidebar {
+            width: 25%;
+            height: 100%;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            border: 4px solid black;
+            box-sizing: border-box;
+        }
+
+        #left-sidebar h1 {
+            margin: 0;
+            padding: 10px;
+            border: 1px solid black;
+            box-sizing: border-box;
+        }
+
+        #left-sidebar .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .section-btn {
+            width: 100%; /* Section buttons take full width */
+            padding: 10px;
+            border: 2px solid black;
+            background-color: white;
+            cursor: pointer;
+            box-sizing: border-box;
+            text-align: center;
+            position: relative;
+        }
+
+        .tab-btn, .item-btn {
+            padding: 10px;
+            border: 2px solid black;
+            background-color: white;
+            cursor: pointer;
+            box-sizing: border-box;
+            text-align: center;
+            position: relative;
+            width: fit-content; /* Adjust width to fit content */
+            white-space: nowrap; /* Prevent wrapping */
+        }
+
+        .tab-btn.locked, .item-btn.locked, .section-btn.locked {
+            display: none; /* Hide locked content */
+        }
+
+        .tab-btn:hover .modal, .item-btn:hover .modal, .section-btn:hover .modal {
+            display: block;
+        }
+
+        /* Modal Style */
+        .modal {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: max-content;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid black;
+            background-color: white;
+            box-sizing: border-box;
+            z-index: 1;
+        }
+
+        /* Right Side */
+        #right-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            border: 1px solid black;
+            box-sizing: border-box;
+        }
+
+        #tabs-container {
+            display: flex; /* Display tabs horizontally */
+            flex-wrap: wrap;
+            gap: 10px; /* Space between tabs */
+            padding-bottom: 10px;
+        }
+
+        #items-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #number-display {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="left-sidebar">
+        <h1 id="number-display">ℕ: 100</h1>
+        <div id="number-per-second">ℕ per second: 0</div>
+        <div class="buttons-container" id="sections-container"></div>
+    </div>
+
+    <div id="right-content">
+        <div id="tabs-container"></div>
+        <div id="items-container"></div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            numbers: 100,
+            numbersPerSecond: 0,
+            sections: {},
+            tabs: {},
+            items: {}
+        };
+
+        // Configurable Data
+        const gameConfig = {
+            sections: [
+                {
+                    id: 'section-numbers',
+                    name: 'Numbers',
+                    modalMessage: "Don't ask a mathematician what a number is",
+                    shownFrom: 0,
+                    tabs: [
+                        {
+                            id: 'tabs-numbers-1',
+                            name: 'Numbers Tab 1',
+                            modalMessage: 'Numbers tab 1 explanation',
+                            shownFrom: 0,
+                            items: [
+                                {
+                                    id: 'item-numbers-1',
+                                    name: 'Numbers Item 1',
+                                    modalMessage: 'Details about Numbers Item 1',
+                                    amountOwned: 0,
+                                    basePrice: 10,
+                                    priceFunction: (amountOwned) => 10 + amountOwned * 2,
+                                    shownFrom: 0
+                                },
+                                {
+                                    id: 'item-numbers-2',
+                                    name: 'Numbers Item 2',
+                                    modalMessage: 'Details about Numbers Item 2',
+                                    amountOwned: 0,
+                                    basePrice: 20,
+                                    priceFunction: (amountOwned) => 20 + amountOwned * 3,
+                                    shownFrom: 50
+                                }
+                            ]
+                        },
+                        {
+                            id: 'tabs-numbers-2',
+                            name: 'Numbers Tab 2',
+                            modalMessage: 'Numbers tab 2 explanation',
+                            shownFrom: 100,
+                            items: [
+                                {
+                                    id: 'item-numbers-3',
+                                    name: 'Numbers Item 3',
+                                    modalMessage: 'Details about Numbers Item 3',
+                                    amountOwned: 0,
+                                    basePrice: 30,
+                                    priceFunction: (amountOwned) => 30 + amountOwned * 4,
+                                    shownFrom: 100
+                                }
+                            ]
+                        }
+                    ]
+                },
+                // Add more sections similarly...
+            ]
+        };
+
+        // Initialization
+        function initializeGame() {
+            // Initialize sections
+            gameConfig.sections.forEach(section => {
+                gameState.sections[section.id] = {
+                    name: section.name,
+                    modalMessage: section.modalMessage,
+                    shownFrom: section.shownFrom,
+                    isActive: false
+                };
+
+                // Create section buttons
+                const sectionButton = document.createElement('div');
+                sectionButton.className = 'section-btn';
+                sectionButton.textContent = section.name;
+                sectionButton.onclick = () => showSection(section.id);
+                if (gameState.numbers < section.shownFrom) {
+                    sectionButton.classList.add('locked');
+                }
+
+                const sectionModal = document.createElement('div');
+                sectionModal.className = 'modal';
+                sectionModal.textContent = section.modalMessage;
+                sectionButton.appendChild(sectionModal);
+
+                document.getElementById('sections-container').appendChild(sectionButton);
+
+                // Initialize tabs
+                section.tabs.forEach(tab => {
+                    gameState.tabs[tab.id] = {
+                        name: tab.name,
+                        modalMessage: tab.modalMessage,
+                        shownFrom: tab.shownFrom,
+                        isActive: false,
+                        items: []
+                    };
+
+                    // Create tab buttons (inside the section container)
+                    const tabButton = document.createElement('div');
+                    tabButton.className = 'tab-btn';
+                    tabButton.textContent = tab.name;
+                    tabButton.onclick = () => showItems(tab.id);
+                    if (gameState.numbers < tab.shownFrom) {
+                        tabButton.classList.add('locked');
+                    }
+
+                    const tabModal = document.createElement('div');
+                    tabModal.className = 'modal';
+                    tabModal.textContent = tab.modalMessage;
+                    tabButton.appendChild(tabModal);
+
+                    gameState.sections[section.id].tabs = gameState.sections[section.id].tabs || [];
+                    gameState.sections[section.id].tabs.push(tabButton);
+
+                    // Initialize items
+                    tab.items.forEach(item => {
+                        gameState.items[item.id] = {
+                            name: item.name,
+                            modalMessage: item.modalMessage,
+                            amountOwned: item.amountOwned,
+                            basePrice: item.basePrice,
+                            priceFunction: item.priceFunction,
+                            shownFrom: item.shownFrom,
+                            isActive: false
+                        };
+
+                        // Create item buttons (inside the tab container)
+                        const itemButton = document.createElement('div');
+                        itemButton.className = 'item-btn';
+                        itemButton.textContent = `${item.name} - Price: ${item.basePrice} ℕ`;
+                        itemButton.onclick = () => buyItem(item.id);
+                        if (gameState.numbers < item.shownFrom) {
+                            itemButton.classList.add('locked');
+                        }
+
+                        const itemModal = document.createElement('div');
+                        itemModal.className = 'modal';
+                        itemModal.textContent = item.modalMessage;
+                        itemButton.appendChild(itemModal);
+
+                        gameState.tabs[tab.id].items.push(itemButton);
+                    });
+                });
+            });
+
+            updateNumberDisplay();
+            setInterval(incrementNumbers, 1000); // Increment numbers per second
+        }
+
+        // Show Section
+        function showSection(sectionId) {
+            const section = gameState.sections[sectionId];
+            if (gameState.numbers >= section.shownFrom) {
+                document.getElementById('tabs-container').innerHTML = '';
+                document.getElementById('items-container').innerHTML = '';
+
+                section.tabs.forEach(tabButton => {
+                    document.getElementById('tabs-container').appendChild(tabButton);
+                });
+
+                showItems(section.tabs[0].id); // Show first tab by default
+            }
+        }
+
+        // Show Items
+        function showItems(tabId) {
+            const tab = gameState.tabs[tabId];
+            if (gameState.numbers >= tab.shownFrom) {
+                document.getElementById('items-container').innerHTML = '';
+                tab.items.forEach(itemButton => {
+                    document.getElementById('items-container').appendChild(itemButton);
+                });
+            }
+        }
+
+        // Buy Item
+        function buyItem(itemId) {
+            const item = gameState.items[itemId];
+            const price = item.priceFunction(item.amountOwned);
+
+            if (gameState.numbers >= price) {
+                gameState.numbers -= price;
+                item.amountOwned += 1;
+                gameState.numbersPerSecond += 1; // Increase numbers per second (example logic)
+                updateNumberDisplay();
+            }
+        }
+
+        // Update Display
+        function updateNumberDisplay() {
+            document.getElementById('number-display').textContent = `ℕ: ${gameState.numbers}`;
+            document.getElementById('number-per-second').textContent = `ℕ per second: ${gameState.numbersPerSecond}`;
+        }
+
+        // Increment numbers per second
+        function incrementNumbers() {
+            gameState.numbers += gameState.numbersPerSecond;
+            updateNumberDisplay();
+        }
+
+        // Initialize the game on window load
+        window.onload = initializeGame;
+    </script>
+
+</body>
+</html>
