@@ -21,7 +21,7 @@
             padding: 10px;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
+            justify-content: space-between;
             border: 4px solid black;
             box-sizing: border-box;
             gap: 20px;
@@ -129,9 +129,14 @@
 <body>
 
     <div id="left-sidebar">
-        <h1 id="number-display">ℕ: 20</h1>
-        <h2 id="number-per-second">ℕ per second: 0</h2>
-        <div class="buttons-container" id="sections-container"></div>
+        <div class="buttons-container">
+            <h1 id="number-display">ℕ: 20</h1>
+            <h2 id="number-per-second">ℕ per second: 0</h2>
+            <div class="buttons-container" id="sections-container"></div>            
+        </div>
+        <div class="buttons-container" id="options-container">
+            <div class="section-btn" onclick="resetGameState()">Reset all progress</div>
+        </div>
     </div>
 
     <div id="right-content">
@@ -588,6 +593,21 @@
                 updateNumbersPerSecond(); // Recalculate numbers per second based on loaded items
                 console.log('Game loaded.');
             }
+        }
+
+        function resetGameState() {
+            const saveData = {
+                numbers: 20,
+                items: Object.keys(gameState.items).reduce((acc, itemId) => {
+                    acc[itemId] = {
+                        amountOwned: 0
+                    };
+                    return acc;
+                }, {})
+            };
+            localStorage.setItem('clickerGameSave', JSON.stringify(saveData));
+            loadGameState();
+            console.log('Game reset.');
         }
 
 
