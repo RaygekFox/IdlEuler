@@ -178,12 +178,13 @@
             gameConfig.sections.forEach(section => {
                 section.tabs.forEach(tab => {
                     tab.items.forEach(item => {
-                        item.priceFunction = new Function('amountOwned', `return ${item.priceFunction};`);
-                        item.nPerSecondFunction = new Function('amountOwned', `return ${item.nPerSecondFunction};`);
+                        item.priceFunction = new Function('amountOwned', `return (${item.priceFunction});`);
+                        item.nPerSecondFunction = new Function('amountOwned', `return (${item.nPerSecondFunction});`);
                     });
                 });
             });
         }
+
 
 
 
@@ -290,7 +291,8 @@
                     const itemButton = document.createElement('div');
                     itemButton.className = 'item-btn';
                     const newPrice = item.priceFunction(gameState.items[item.id].amountOwned);
-                    itemButton.textContent = `${item.name} = ${format(gameState.items[item.id].amountOwned)} - Price:  ${format(newPrice)} ℕ`;
+                    itemButton.textContent = `${item.name} = ${format(gameState.items[item.id].amountOwned)} - Price: ${format(newPrice)} ℕ`;
+
                     itemButton.onclick = () => buyItem(item.id);
 
                     const itemModal = document.createElement('div');
