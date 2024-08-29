@@ -178,12 +178,18 @@
             gameConfig.sections.forEach(section => {
                 section.tabs.forEach(tab => {
                     tab.items.forEach(item => {
-                        item.priceFunction = eval(`(${item.priceFunction})`);
-                        item.nPerSecondFunction = eval(`(${item.nPerSecondFunction})`);
+                        try {
+                            item.priceFunction = eval(item.priceFunction);
+                            item.nPerSecondFunction = eval(item.nPerSecondFunction);
+                            console.log(`Processed ${item.id} functions correctly.`);
+                        } catch (error) {
+                            console.error(`Error processing functions for item ${item.id}:`, error);
+                        }
                     });
                 });
             });
         }
+
 
 
 
@@ -273,7 +279,6 @@
             }
         }
 
-        // Render Items for a Given Tab
         function renderItems(tabId) {
             const tab = gameConfig.sections.flatMap(section => section.tabs).find(t => t.id === tabId);
             if (!tab) return;
@@ -293,7 +298,6 @@
                     itemButton.className = 'item-btn';
                     const newPrice = item.priceFunction(gameState.items[item.id].amountOwned);
                     itemButton.textContent = `${item.name} = ${format(gameState.items[item.id].amountOwned)} - Price: ${format(newPrice)} ℕ`;
-
                     itemButton.onclick = () => buyItem(item.id);
 
                     const itemModal = document.createElement('div');
@@ -310,6 +314,7 @@
 
             MathJax.typeset()
         }
+
 
         // Buy Item
         function buyItem(itemId) {
