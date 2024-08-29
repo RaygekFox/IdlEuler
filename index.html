@@ -178,12 +178,13 @@
             gameConfig.sections.forEach(section => {
                 section.tabs.forEach(tab => {
                     tab.items.forEach(item => {
-                        item.priceFunction = new Function('amountOwned', `return (${item.priceFunction});`);
-                        item.nPerSecondFunction = new Function('amountOwned', `return (${item.nPerSecondFunction});`);
+                        item.priceFunction = eval(`(${item.priceFunction})`);
+                        item.nPerSecondFunction = eval(`(${item.nPerSecondFunction})`);
                     });
                 });
             });
         }
+
 
 
 
