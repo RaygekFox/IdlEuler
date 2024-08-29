@@ -578,15 +578,8 @@
                 gameState.numbers = parsedData.numbers || 0;
 
                 if (parsedData.items) {
-                    console.log("condition if(parsedData.items) is true");
                     Object.keys(parsedData.items).forEach(itemId => {
-                        console.log("we reached an item");
                         if (gameState.items[itemId]) {
-                            console.log("condition if(gameState.items[itemId]) is true");
-                            console.log("current amount:");
-                            console.log(gameState.items[itemId].amountOwned);
-                            console.log("new amount:");
-                            console.log(parsedData.items[itemId].amountOwned);
                             gameState.items[itemId].amountOwned = parsedData.items[itemId].amountOwned;
                         }
                     });
@@ -597,9 +590,23 @@
             }
         }
 
+
+        function initializeGameState() {
+            gameConfig.sections.forEach(section => {
+                section.tabs.forEach(tab => {
+                    tab.items.forEach(item => {
+                        if (!gameState.items[item.id]) {
+                            gameState.items[item.id] = { amountOwned: 0, ...item };
+                        }
+                    });
+                });
+            });
+        }
+
         // Initialize the game on window load
 
         window.onload = function() {
+            initializeGameState();
             loadGameState(); // Load the game state before rendering
             renderGame();
             updateNumbersPerSecond();
