@@ -578,9 +578,15 @@
                 gameState.numbers = parsedData.numbers || 0;
 
                 if (parsedData.items) {
+                    console.log("condition if(parsedData.items) is true");
                     Object.keys(parsedData.items).forEach(itemId => {
+                        console.log("we reached an item");
                         if (gameState.items[itemId]) {
-
+                            console.log("condition if(gameState.items[itemId]) is true");
+                            console.log("current amount:");
+                            console.log(gameState.items[itemId].amountOwned);
+                            console.log("new amount:");
+                            console.log(parsedData.items[itemId].amountOwned);
                             gameState.items[itemId].amountOwned = parsedData.items[itemId].amountOwned;
                         }
                     });
