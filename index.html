@@ -156,6 +156,7 @@
             activeTab: null       // Track the currently active tab
         };
 
+
         // Configurable Data
         const gameConfig = {
             sections: [
@@ -384,6 +385,7 @@
             ]
         };
 
+
         // Centralized Render Function
         function renderGame() {
             console.log("Rendering game...");
@@ -466,7 +468,7 @@
             }
         }
 
-        // Render Items for a Given Tab
+
         function renderItems(tabId) {
             const tab = gameConfig.sections.flatMap(section => section.tabs).find(t => t.id === tabId);
             if (!tab) return;
@@ -485,7 +487,9 @@
                     const itemButton = document.createElement('div');
                     itemButton.className = 'item-btn';
                     const newPrice = item.priceFunction(gameState.items[item.id].amountOwned);
+
                     itemButton.textContent = `${item.name} = ${format(gameState.items[item.id].amountOwned)} - Price:  ${format(newPrice)} ℕ`;
+
                     itemButton.onclick = () => buyItem(item.id);
 
                     const itemModal = document.createElement('div');
@@ -502,6 +506,7 @@
 
             MathJax.typeset()
         }
+
 
         // Buy Item
         function buyItem(itemId) {
@@ -575,6 +580,7 @@
                 if (parsedData.items) {
                     Object.keys(parsedData.items).forEach(itemId => {
                         if (gameState.items[itemId]) {
+
                             gameState.items[itemId].amountOwned = parsedData.items[itemId].amountOwned;
                         }
                     });
@@ -586,6 +592,7 @@
         }
 
         // Initialize the game on window load
+
         window.onload = function() {
             //loadGameState(); // Load the game state before rendering
             renderGame();
@@ -594,6 +601,7 @@
             setInterval(incrementNumbers, 1000);
             setInterval(saveGameState, 60000); // Save the game state every minute
         };
+
 
         // Save game state when the user leaves the page
         window.onbeforeunload = function() {
