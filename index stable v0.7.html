@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <title>Clicker Game</title>
+    <title>IdlEuler</title>
     <style>
         body {
             margin: 0;
@@ -21,7 +21,7 @@
             padding: 10px;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
+            justify-content: space-between;
             border: 4px solid black;
             box-sizing: border-box;
             gap: 20px;
@@ -129,9 +129,16 @@
 <body>
 
     <div id="left-sidebar">
-        <h1 id="number-display">ℕ: 20</h1>
-        <h2 id="number-per-second">ℕ per second: 0</h2>
-        <div class="buttons-container" id="sections-container"></div>
+        <div class="buttons-container">
+            <h1 id="number-display">ℕ: 20</h1>
+            <h2 id="number-per-second">ℕ per second: 0</h2>
+            <div class="buttons-container" id="sections-container"></div>            
+        </div>
+        <div class="buttons-container" id="options-container">
+            <h2>Version: 0.7</h2>
+            <div class="section-btn" onclick="numbersXten()">Multiply ℕ by 10</div>
+            <div class="section-btn" onclick="resetGameState()">Reset all progress</div>
+        </div>
     </div>
 
     <div id="right-content">
@@ -144,6 +151,7 @@
         let gameState = {
             numbers: 20,
             numbersPerSecond: 0,
+            multiplier: 1,
             sections: {},
             tabs: {},
             items: {},
@@ -155,6 +163,7 @@
             activeSection: null,  // Track the currently active section
             activeTab: null       // Track the currently active tab
         };
+
 
         // Configurable Data
         const gameConfig = {
@@ -174,7 +183,7 @@
                                 {
                                     id: 'item-numbers-n',
                                     name: '\\(n\\)',
-                                    modalMessage: 'Details about Numbers Item 1',
+                                    modalMessage: 'Too many things are called with this letter in this game',
                                     basePrice: 10,
                                     priceFunction: (amountOwned) => 10 * Math.pow(2, amountOwned),
                                     nPerSecondFunction: (amountOwned) => 0,
@@ -183,7 +192,7 @@
                                 {
                                     id: 'item-numbers-m',
                                     name: '\\(m\\)',
-                                    modalMessage: 'Details about Numbers Item 2',
+                                    modalMessage: 'You will not guess what letter comes next',
                                     basePrice: 200,
                                     priceFunction: (amountOwned) => 200 * Math.pow(3, amountOwned),
                                     nPerSecondFunction: (amountOwned) => 0,
@@ -192,7 +201,7 @@
                                 {
                                     id: 'item-numbers-a',
                                     name: '\\(a\\)',
-                                    modalMessage: 'Details about Numbers Item 3',
+                                    modalMessage: 'Told you',
                                     basePrice: 5000,
                                     priceFunction: (amountOwned) => 5000 * Math.pow(4, amountOwned),
                                     nPerSecondFunction: (amountOwned) => 0,
@@ -201,7 +210,7 @@
                                 {
                                     id: 'item-numbers-b',   
                                     name: '\\(b\\)',
-                                    modalMessage: 'Details about Numbers Item 4',
+                                    modalMessage: '2b or not 2b?',
                                     basePrice: 250000,
                                     priceFunction: (amountOwned) => 25000 * Math.pow(5, amountOwned),
                                     nPerSecondFunction: (amountOwned) => 0,
@@ -210,11 +219,20 @@
                                 {
                                     id: 'item-numbers-c',   
                                     name: '\\(c\\)',
-                                    modalMessage: 'Details about Numbers Item 5',
+                                    modalMessage: 'You will never guess what comes next again',
                                     basePrice: 900000,
                                     priceFunction: (amountOwned) => 900000 * Math.pow(6, amountOwned),
                                     nPerSecondFunction: (amountOwned) => 0,
                                     shownFrom: 1000
+                                },
+                                {
+                                    id: 'item-numbers-d',   
+                                    name: '\\(d\\)',
+                                    modalMessage: 'The only 0D game out there so far',
+                                    basePrice: 25000000, // 25 000 000
+                                    priceFunction: (amountOwned) => 25000000 * Math.pow(7, amountOwned),
+                                    nPerSecondFunction: (amountOwned) => 0,
+                                    shownFrom: 1000000 // 1 000 000
                                 }
                             ]
                         }
@@ -258,7 +276,7 @@
                         {
                             id: 'tabs-functions-operations',
                             name: 'Operations',   
-                            modalMessage: 'More complicated functions',
+                            modalMessage: 'It takes two',
                             shownFrom: 500,
                             items: [
                                 {
@@ -312,7 +330,7 @@
                                     id: 'item-functions-polynomial-quadratic',
                                     name: 'Quadratic',
                                     modalMessage: '\\(\\frac{dN}{dt} = n^2\\)',
-                                    basePrice: 100000,
+                                    basePrice: 100000, // 100 000
                                     priceFunction: (amountOwned) => Math.floor(100000 * Math.pow(1.5, amountOwned)),
                                     nPerSecondFunction: (amountOwned) => {
                                         const nValue = gameState.items['item-numbers-n']?.amountOwned || 0;
@@ -324,56 +342,93 @@
                                     id: 'item-functions-polynomial-cubic',   
                                     name: 'Cubic',
                                     modalMessage: '\\(\\frac{dN}{dt} = m^3\\)',
-                                    basePrice: 1300000,
+                                    basePrice: 1300000, // 1 300 000
                                     priceFunction: (amountOwned) => Math.floor(1300000 * Math.pow(1.5, amountOwned)),
                                     nPerSecondFunction: (amountOwned) => {
                                         const mValue = gameState.items['item-numbers-m']?.amountOwned || 0;   
                                         return Math.pow(mValue, 3) * amountOwned;
                                     },
-                                    shownFrom: 100000
+                                    shownFrom: 100000 // 100 000
                                 },
                                 {
                                     id: 'item-functions-polynomial-quartic',   
                                     name: 'Quartic',
                                     modalMessage: '\\(\\frac{dN}{dt} = a^4\\)',
-                                    basePrice: 8000000,
+                                    basePrice: 8000000, // 8 000 000
                                     priceFunction: (amountOwned) => Math.floor(8000000 * Math.pow(1.5, amountOwned)),
                                     nPerSecondFunction: (amountOwned) => {
                                         const aValue = gameState.items['item-numbers-a']?.amountOwned || 0;
                                         return Math.pow(aValue, 4) * amountOwned;
                                     },
-                                    shownFrom: 100000
+                                    shownFrom: 100000 // 100 000
                                 },
                                 {
                                     id: 'item-functions-polynomial-quintic',   
                                     name: 'Quintic',
                                     modalMessage: '\\(\\frac{dN}{dt} = b^5\\)',
-                                    basePrice: 95000000,
+                                    basePrice: 95000000, // 95 000 000
                                     priceFunction: (amountOwned) => Math.floor(95000000 * Math.pow(1.5, amountOwned)),
                                     nPerSecondFunction: (amountOwned) => {
                                         const bValue = gameState.items['item-numbers-b']?.amountOwned || 0;
                                         return Math.pow(bValue, 5) * amountOwned;
                                     },
-                                    shownFrom: 100000
+                                    shownFrom: 100000 // 100 000
                                 },
                                 {
                                     id: 'item-functions-polynomial-sextic',   
                                     name: 'Sextic',
                                     modalMessage: '\\(\\frac{dN}{dt} = c^6\\)',
-                                    basePrice: 1000000000,
+                                    basePrice: 1000000000, //1 000 000 000
                                     priceFunction: (amountOwned) => Math.floor(1000000000 * Math.pow(1.5, amountOwned)),
                                     nPerSecondFunction: (amountOwned) => {
                                         const cValue = gameState.items['item-numbers-c']?.amountOwned || 0;   
                                         return Math.pow(cValue, 6) * amountOwned;
                                     },
-                                    shownFrom: 100000
+                                    shownFrom: 100000 // 100 000
+                                }
+                            ]
+                        }
+                    ]
+                },
+
+                {
+                    id: 'section-geometry',
+                    name: 'Geometry',   
+                    modalMessage: 'It will only be a geometric progression from now on...',
+                    shownFrom: 1000000, //1 000 000
+                    tabs: [
+                        {   
+                            id: 'tabs-geometry-shapes',
+                            name: 'Shapes',   
+                            modalMessage: '\\(A=(n,m)\\), \\(B=(a,b)\\), \\(C=(c,d)\\), \\(D=(p,q)\\)',
+                            shownFrom: 1000000, //1 000 000
+                            items: [
+                                {   
+                                    id: 'item-geometry-shapes-triangle',
+                                    name: 'Triangle',   
+                                    modalMessage: 'Multiplies \\(\\frac{dN}{dt}\\) by the area of the triangle \\(ABC\\). Be careful, it may decrease it or even make it zero.',
+                                    basePrice: 1000000, //1 000 000
+                                    priceFunction: (amountOwned) => Math.floor(1000000 * Math.pow(2.25, amountOwned)),
+                                    //nPerSecondFunction: (amountOwned) => 0,
+                                    multiplierFunction: (amountOwned) => {
+                                        const n = gameState.items['item-numbers-n']?.amountOwned || 0;   
+                                        const m = gameState.items['item-numbers-m']?.amountOwned || 0;
+                                        const a = gameState.items['item-numbers-a']?.amountOwned || 0;
+                                        const b = gameState.items['item-numbers-b']?.amountOwned || 0;
+                                        const c = gameState.items['item-numbers-c']?.amountOwned || 0;
+                                        const d = gameState.items['item-numbers-d']?.amountOwned || 0;
+                                        return Math.pow(Math.abs(((b-m)*(c-a)+(n-a)*(d-b))), amountOwned);
+                                    },
+                                    shownFrom: 1000000 //1 000 000
                                 }
                             ]
                         }
                     ]
                 }
+
             ]
         };
+
 
         // Centralized Render Function
         function renderGame() {
@@ -457,7 +512,7 @@
             }
         }
 
-        // Render Items for a Given Tab
+
         function renderItems(tabId) {
             const tab = gameConfig.sections.flatMap(section => section.tabs).find(t => t.id === tabId);
             if (!tab) return;
@@ -476,7 +531,9 @@
                     const itemButton = document.createElement('div');
                     itemButton.className = 'item-btn';
                     const newPrice = item.priceFunction(gameState.items[item.id].amountOwned);
+
                     itemButton.textContent = `${item.name} = ${format(gameState.items[item.id].amountOwned)} - Price:  ${format(newPrice)} ℕ`;
+
                     itemButton.onclick = () => buyItem(item.id);
 
                     const itemModal = document.createElement('div');
@@ -493,6 +550,7 @@
 
             MathJax.typeset()
         }
+
 
         // Buy Item
         function buyItem(itemId) {
@@ -517,10 +575,36 @@
 
         // Update N per second calculations based on owned items
         function updateNumbersPerSecond() {
+            updateMultiplier();
             gameState.numbersPerSecond = gameConfig.sections.flatMap(section => section.tabs)
                 .flatMap(tab => tab.items)
-                .reduce((total, item) => total + item.nPerSecondFunction(gameState.items[item.id]?.amountOwned || 0), 0);
+                .reduce((total, item) => {
+                    if (typeof item.nPerSecondFunction === 'function') {
+                        return total + item.nPerSecondFunction(gameState.items[item.id]?.amountOwned || 0);
+                    }
+                    return total;  // Return the current total if nPerSecondFunction is not a function
+                }, 0);  // Start with an initial value of 0
+
+            gameState.numbersPerSecond *= gameState.multiplier;
+            gameState.numbersPerSecond = Math.floor(gameState.numbersPerSecond);
+            console.log("gameState.numbersPerSecond");
+            console.log(gameState.numbersPerSecond);
         }
+
+
+        function updateMultiplier() {
+            gameState.multiplier = gameConfig.sections.flatMap(section => section.tabs)
+                .flatMap(tab => tab.items)
+                .reduce((total, item) => {
+                    if (typeof item.multiplierFunction === 'function') {
+                        return total * item.multiplierFunction(gameState.items[item.id]?.amountOwned || 0);
+                    }
+                    return total;  // If multiplierFunction is not defined, just return the current total
+                }, 1);
+            console.log("gameState.multiplier");
+            console.log(gameState.multiplier);
+        }
+
 
         // Update Display
         function updateNumberDisplay() {
@@ -541,13 +625,91 @@
         }
 
 
+        // Save Game State to Local Storage
+        function saveGameState() {
+            const saveData = {
+                numbers: gameState.numbers,
+                items: Object.keys(gameState.items).reduce((acc, itemId) => {
+                    acc[itemId] = {
+                        amountOwned: gameState.items[itemId].amountOwned
+                    };
+                    return acc;
+                }, {})
+            };
+            localStorage.setItem('clickerGameSave', JSON.stringify(saveData));
+            console.log('Game saved.');
+        }
+
+        // Load Game State from Local Storage
+        function loadGameState() {
+            const savedData = localStorage.getItem('clickerGameSave');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                gameState.numbers = parsedData.numbers || 0;
+
+                if (parsedData.items) {
+                    Object.keys(parsedData.items).forEach(itemId => {
+                        if (gameState.items[itemId]) {
+                            gameState.items[itemId].amountOwned = parsedData.items[itemId].amountOwned;
+                        }
+                    });
+                }
+
+                updateNumbersPerSecond(); // Recalculate numbers per second based on loaded items
+                console.log('Game loaded.');
+            }
+        }
+
+        function resetGameState() {
+            const saveData = {
+                numbers: 20,
+                items: Object.keys(gameState.items).reduce((acc, itemId) => {
+                    acc[itemId] = {
+                        amountOwned: 0
+                    };
+                    return acc;
+                }, {})
+            };
+            localStorage.setItem('clickerGameSave', JSON.stringify(saveData));
+            loadGameState();
+            console.log('Game reset.');
+        }
+
+        function numbersXten() {
+            gameState.numbers *= 10;
+        }
+
+
+        function initializeGameState() {
+            gameConfig.sections.forEach(section => {
+                section.tabs.forEach(tab => {
+                    tab.items.forEach(item => {
+                        if (!gameState.items[item.id]) {
+                            gameState.items[item.id] = { amountOwned: 0, ...item };
+                        }
+                    });
+                });
+            });
+        }
+
         // Initialize the game on window load
+
         window.onload = function() {
+            initializeGameState();
+            loadGameState(); // Load the game state before rendering
             renderGame();
             updateNumbersPerSecond();
             updateNumberDisplay();
             setInterval(incrementNumbers, 1000);
+            setInterval(saveGameState, 60000); // Save the game state every minute
         };
+
+
+        // Save game state when the user leaves the page
+        window.onbeforeunload = function() {
+            saveGameState();
+        };
+
     </script>
 </body>
 </html>
