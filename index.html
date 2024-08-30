@@ -147,7 +147,10 @@
     </div>
 
     <script>
-        // Game State
+
+
+
+        // GAME STATE
         let gameState = {
             numbers: 20,
             numbersPerSecond: 0,
@@ -165,7 +168,7 @@
         };
 
 
-        // Configurable Data
+        // CONFIG
         const gameConfig = {
             sections: [
                 {
@@ -430,6 +433,9 @@
         };
 
 
+        // FUNCTIONS
+
+
         // Centralized Render Function
         function renderGame() {
             console.log("Rendering game...");
@@ -634,11 +640,13 @@
                         amountOwned: gameState.items[itemId].amountOwned
                     };
                     return acc;
-                }, {})
+                }, {}),  
+                unlocked: gameState.unlocked
             };
             localStorage.setItem('clickerGameSave', JSON.stringify(saveData));
             console.log('Game saved.');
         }
+
 
         // Load Game State from Local Storage
         function loadGameState() {
@@ -653,7 +661,9 @@
                             gameState.items[itemId].amountOwned = parsedData.items[itemId].amountOwned;
                         }
                     });
+                    gameState.unlocked = parsedData.unlocked || {sections: {}, tabs: {}, items: {} };
                 }
+
 
                 updateNumbersPerSecond(); // Recalculate numbers per second based on loaded items
                 console.log('Game loaded.');
@@ -692,7 +702,7 @@
             });
         }
 
-        // Initialize the game on window load
+        // INITIALIZATION OF GAME
 
         window.onload = function() {
             initializeGameState();
