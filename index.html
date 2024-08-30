@@ -135,7 +135,7 @@
             <div class="buttons-container" id="sections-container"></div>            
         </div>
         <div class="buttons-container" id="options-container">
-            <h2>Version: 0.8</h2>
+            <h2>Version: 0.7</h2>
             <div class="section-btn" onclick="numbersXten()">Multiply ℕ by 10</div>
             <div class="section-btn" onclick="resetGameState()">Reset all progress</div>
         </div>
@@ -666,16 +666,38 @@
 
         // Save Game State to Local Storage
         function saveGameState() {
-            localStorage.setItem('clickerGameSave', JSON.stringify(gameState));
+            const saveData = {
+                numbers: gameState.numbers,
+                items: Object.keys(gameState.items).reduce((acc, itemId) => {
+                    acc[itemId] = {
+                        amountOwned: gameState.items[itemId].amountOwned
+                    };
+                    return acc;
+                }, {}),  
+                unlocked: gameState.unlocked
+            };
+            localStorage.setItem('clickerGameSave', JSON.stringify(saveData));
             console.log('Game saved.');
         }
+
 
         // Load Game State from Local Storage
         function loadGameState() {
             const savedData = localStorage.getItem('clickerGameSave');
             if (savedData) {
                 const parsedData = JSON.parse(savedData);
-                Object.assign(gameState, parsedData);  // Merge the saved data into the current gameState
+                gameState.numbers = parsedData.numbers || 0;
+
+                if (parsedData.items) {
+                    Object.keys(parsedData.items).forEach(itemId => {
+                        if (gameState.items[itemId]) {
+                            gameState.items[itemId].amountOwned = parsedData.items[itemId].amountOwned;
+                        }
+                    });
+                    gameState.unlocked = parsedData.unlocked || {sections: {}, tabs: {}, items: {} };
+                }
+
+
                 updateNumbersPerSecond(); // Recalculate numbers per second based on loaded items
                 console.log('Game loaded.');
             }
