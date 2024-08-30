@@ -406,7 +406,7 @@
                                 {   
                                     id: 'item-geometry-shapes-triangle',
                                     name: 'Triangle',   
-                                    modalMessage: 'Multiplies \\(\\frac{dN}{dt} = n\\) by the area of the triangle \\(ABC\\)',
+                                    modalMessage: 'Multiplies \\(\\frac{dN}{dt}\\) by the area of the triangle \\(ABC\\). Be careful, it may decrease it or even make it zero.',
                                     basePrice: 1000000, //1 000 000
                                     priceFunction: (amountOwned) => Math.floor(1000000 * Math.pow(2.25, amountOwned)),
                                     //nPerSecondFunction: (amountOwned) => 0,
@@ -417,7 +417,7 @@
                                         const b = gameState.items['item-numbers-b']?.amountOwned || 0;
                                         const c = gameState.items['item-numbers-c']?.amountOwned || 0;
                                         const d = gameState.items['item-numbers-d']?.amountOwned || 0;
-                                        return Math.pow(((b-m)*(c-a)+(n-a)*(d-b)), amountOwned);
+                                        return Math.pow(Math.abs(((b-m)*(c-a)+(n-a)*(d-b))), amountOwned);
                                     },
                                     shownFrom: 1000000 //1 000 000
                                 }
