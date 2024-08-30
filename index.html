@@ -503,6 +503,14 @@
                     console.log(gameState.totalNumberAtLastBookWriting);
                     console.log(gameState.totalNumbers);
                     firstBookIsWritten = true;
+                    gameState.numbers = 20;
+                    // Reset amountOwned for all items
+                    Object.keys(gameState.items).forEach(itemId => {
+                        gameState.items[itemId].amountOwned = 0;
+                    });
+                    saveGameState();
+                    loadGameState();
+                    renderGame();
                 };
                 document.getElementById('sections-container').appendChild(writeBookButton);
             }
