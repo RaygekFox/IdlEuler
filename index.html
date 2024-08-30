@@ -153,8 +153,13 @@
         // GAME STATE
         let gameState = {
             numbers: 20,
+            totalNumbers: 20,
+            totalNumberAtLastBookWriting: 0,
             numbersPerSecond: 0,
             multiplier: 1,
+            axioms: 0,
+            writingUnlocked: false,
+            firstBookIsWritten: true,
             sections: {},
             tabs: {},
             items: {},
@@ -163,6 +168,7 @@
                 tabs: {},
                 items: {}
             },
+            books: {},
             activeSection: null,  // Track the currently active section
             activeTab: null       // Track the currently active tab
         };
@@ -445,6 +451,15 @@
             document.getElementById('tabs-container').innerHTML = '';
             document.getElementById('items-container').innerHTML = '';
 
+            //Render number of axioms
+            if (gameState.firstBookIsWritten) {
+                const axiomsNumberDisplay = document.createElement('h2');
+                axiomsNumberDisplay.textContent = 'Axioms: ' + gameState.axioms;
+                document.getElementById('sections-container').appendChild(axiomsNumberDisplay);
+            }
+
+
+
             // Render sections
             gameConfig.sections.forEach(section => {
                 if (gameState.numbers >= section.shownFrom || gameState.unlocked.sections[section.id]) {
@@ -475,6 +490,23 @@
                 const firstSection = gameConfig.sections.find(section => gameState.unlocked.sections[section.id]);
                 if (firstSection) renderTabs(firstSection.id);
             }
+
+            //Render Write a book button
+            if (gameState.writingUnlocked || gameState.numbers >= 2000000) {
+                gameState.writingUnlocked = true;
+                const writeBookButton = document.createElement('div');
+                writeBookButton.className = 'section-btn';
+                writeBookButton.textContent = 'Write a book';
+                writeBookButton.onclick = () => {
+                    gameState.axioms += Math.floor((Math.log10(gameState.totalNumbers+1)-Math.log10(gameState.totalNumberAtLastBookWriting+1))*50);
+                    gameState.totalNumberAtLastBookWriting = gameState.totalNumbers;
+                    console.log(gameState.totalNumberAtLastBookWriting);
+                    console.log(gameState.totalNumbers);
+                    firstBookIsWritten = true;
+                };
+                document.getElementById('sections-container').appendChild(writeBookButton);
+            }
+
         }
 
         // Render Tabs and Items for a Given Section
@@ -621,6 +653,7 @@
         // Increment numbers per second
         function incrementNumbers() {
             gameState.numbers += gameState.numbersPerSecond;
+            gameState.totalNumbers += gameState.numbersPerSecond;
             updateNumberDisplay();
             renderGame(); // Re-render game elements after incrementing N
         }
