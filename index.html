@@ -136,6 +136,7 @@
         </div>
         <div class="buttons-container" id="options-container">
             <h2>Version: 0.7</h2>
+            <div class="section-btn" onclick="numbersXten()">Multiply ℕ by 10</div>
             <div class="section-btn" onclick="resetGameState()">Reset all progress</div>
         </div>
     </div>
@@ -227,10 +228,10 @@
                                     id: 'item-numbers-d',   
                                     name: '\\(d\\)',
                                     modalMessage: 'The only 0D game out there so far',
-                                    basePrice: 25000000,
+                                    basePrice: 25000000, // 25 000 000
                                     priceFunction: (amountOwned) => 25000000 * Math.pow(7, amountOwned),
                                     nPerSecondFunction: (amountOwned) => 0,
-                                    shownFrom: 1000000
+                                    shownFrom: 1000000 // 1 000 000
                                 }
                             ]
                         }
@@ -328,7 +329,7 @@
                                     id: 'item-functions-polynomial-quadratic',
                                     name: 'Quadratic',
                                     modalMessage: '\\(\\frac{dN}{dt} = n^2\\)',
-                                    basePrice: 100000,
+                                    basePrice: 100000, // 100 000
                                     priceFunction: (amountOwned) => Math.floor(100000 * Math.pow(1.5, amountOwned)),
                                     nPerSecondFunction: (amountOwned) => {
                                         const nValue = gameState.items['item-numbers-n']?.amountOwned || 0;
@@ -340,50 +341,67 @@
                                     id: 'item-functions-polynomial-cubic',   
                                     name: 'Cubic',
                                     modalMessage: '\\(\\frac{dN}{dt} = m^3\\)',
-                                    basePrice: 1300000,
+                                    basePrice: 1300000, // 1 300 000
                                     priceFunction: (amountOwned) => Math.floor(1300000 * Math.pow(1.5, amountOwned)),
                                     nPerSecondFunction: (amountOwned) => {
                                         const mValue = gameState.items['item-numbers-m']?.amountOwned || 0;   
                                         return Math.pow(mValue, 3) * amountOwned;
                                     },
-                                    shownFrom: 100000
+                                    shownFrom: 100000 // 100 000
                                 },
                                 {
                                     id: 'item-functions-polynomial-quartic',   
                                     name: 'Quartic',
                                     modalMessage: '\\(\\frac{dN}{dt} = a^4\\)',
-                                    basePrice: 8000000,
+                                    basePrice: 8000000, // 8 000 000
                                     priceFunction: (amountOwned) => Math.floor(8000000 * Math.pow(1.5, amountOwned)),
                                     nPerSecondFunction: (amountOwned) => {
                                         const aValue = gameState.items['item-numbers-a']?.amountOwned || 0;
                                         return Math.pow(aValue, 4) * amountOwned;
                                     },
-                                    shownFrom: 100000
+                                    shownFrom: 100000 // 100 000
                                 },
                                 {
                                     id: 'item-functions-polynomial-quintic',   
                                     name: 'Quintic',
                                     modalMessage: '\\(\\frac{dN}{dt} = b^5\\)',
-                                    basePrice: 95000000,
+                                    basePrice: 95000000, // 95 000 000
                                     priceFunction: (amountOwned) => Math.floor(95000000 * Math.pow(1.5, amountOwned)),
                                     nPerSecondFunction: (amountOwned) => {
                                         const bValue = gameState.items['item-numbers-b']?.amountOwned || 0;
                                         return Math.pow(bValue, 5) * amountOwned;
                                     },
-                                    shownFrom: 100000
+                                    shownFrom: 100000 // 100 000
                                 },
                                 {
                                     id: 'item-functions-polynomial-sextic',   
                                     name: 'Sextic',
                                     modalMessage: '\\(\\frac{dN}{dt} = c^6\\)',
-                                    basePrice: 1000000000,
+                                    basePrice: 1000000000, //1 000 000 000
                                     priceFunction: (amountOwned) => Math.floor(1000000000 * Math.pow(1.5, amountOwned)),
                                     nPerSecondFunction: (amountOwned) => {
                                         const cValue = gameState.items['item-numbers-c']?.amountOwned || 0;   
                                         return Math.pow(cValue, 6) * amountOwned;
                                     },
-                                    shownFrom: 100000
+                                    shownFrom: 100000 // 100 000
                                 }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 'section-geometry',
+                    name: 'Geometry',   
+                    modalMessage: 'It will only be a geometric progression from now on...',
+                    shownFrom: 1000000, //1 000 000
+                    tabs: [
+                        {   
+                            id: 'tabs-geometry-shapes',
+                            name: 'Shapes',   
+                            modalMessage: '//(A=(n,m)//), //(B=(a,b)//), //(C=(c,d)//), //(D=(p,q)//)'
+                            shownFrom: 1000000, //1 000 000
+                            items: [
+                                
                             ]
                         }
                     ]
@@ -609,6 +627,10 @@
             localStorage.setItem('clickerGameSave', JSON.stringify(saveData));
             loadGameState();
             console.log('Game reset.');
+        }
+
+        function numbersXten() {
+            gameState.numbers *= 10;
         }
 
 
