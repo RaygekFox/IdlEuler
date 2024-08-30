@@ -151,6 +151,7 @@
         let gameState = {
             numbers: 20,
             numbersPerSecond: 0,
+            multiplier: 1,
             sections: {},
             tabs: {},
             items: {},
@@ -402,7 +403,24 @@
                             modalMessage: '\\(A=(n,m)\\), \\(B=(a,b)\\), \\(C=(c,d)\\), \\(D=(p,q)\\)',
                             shownFrom: 1000000, //1 000 000
                             items: [
-                                
+                                {   
+                                    id: 'item-geometry-shapes-triangle',
+                                    name: 'Triangle',   
+                                    modalMessage: 'Multiplies \\(\\frac{dN}{dt} = n\\) by the area of the triangle \\(ABC\\)',
+                                    basePrice: 1000000, //1 000 000
+                                    priceFunction: (amountOwned) => Math.floor(1000000 * Math.pow(2.25, amountOwned)),
+                                    //nPerSecondFunction: (amountOwned) => 0,
+                                    multiplierFunction: (amountOwned) => {
+                                        const n = gameState.items['item-numbers-n']?.amountOwned || 0;   
+                                        const m = gameState.items['item-numbers-m']?.amountOwned || 0;
+                                        const a = gameState.items['item-numbers-a']?.amountOwned || 0;
+                                        const b = gameState.items['item-numbers-b']?.amountOwned || 0;
+                                        const c = gameState.items['item-numbers-c']?.amountOwned || 0;
+                                        const d = gameState.items['item-numbers-d']?.amountOwned || 0;
+                                        return Math.pow(((b-m)*(c-a)+(n-a)*(d-b)), amountOwned);
+                                    },
+                                    shownFrom: 1000000 //1 000 000
+                                }
                             ]
                         }
                     ]
@@ -557,10 +575,36 @@
 
         // Update N per second calculations based on owned items
         function updateNumbersPerSecond() {
+            updateMultiplier();
             gameState.numbersPerSecond = gameConfig.sections.flatMap(section => section.tabs)
                 .flatMap(tab => tab.items)
-                .reduce((total, item) => total + item.nPerSecondFunction(gameState.items[item.id]?.amountOwned || 0), 0);
+                .reduce((total, item) => {
+                    if (typeof item.nPerSecondFunction === 'function') {
+                        return total + item.nPerSecondFunction(gameState.items[item.id]?.amountOwned || 0);
+                    }
+                    return total;  // Return the current total if nPerSecondFunction is not a function
+                }, 0);  // Start with an initial value of 0
+
+            gameState.numbersPerSecond *= gameState.multiplier;
+            gameState.numbersPerSecond = Math.floor(gameState.numbersPerSecond);
+            console.log("gameState.numbersPerSecond");
+            console.log(gameState.numbersPerSecond);
         }
+
+
+        function updateMultiplier() {
+            gameState.multiplier = gameConfig.sections.flatMap(section => section.tabs)
+                .flatMap(tab => tab.items)
+                .reduce((total, item) => {
+                    if (typeof item.multiplierFunction === 'function') {
+                        return total * item.multiplierFunction(gameState.items[item.id]?.amountOwned || 0);
+                    }
+                    return total;  // If multiplierFunction is not defined, just return the current total
+                }, 1);
+            console.log("gameState.multiplier");
+            console.log(gameState.multiplier);
+        }
+
 
         // Update Display
         function updateNumberDisplay() {
