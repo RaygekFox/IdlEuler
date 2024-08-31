@@ -502,7 +502,7 @@
                     gameState.totalNumberAtLastBookWriting = gameState.totalNumbers;
                     console.log(gameState.totalNumberAtLastBookWriting);
                     console.log(gameState.totalNumbers);
-                    firstBookIsWritten = true;
+                    gameState.firstBookIsWritten = true;
                     gameState.numbers = 20;
                     // Reset amountOwned for all items
                     Object.keys(gameState.items).forEach(itemId => {
@@ -598,12 +598,15 @@
         }
 
 
-        // Buy Item
         function buyItem(itemId) {
-            const item = gameState.items[itemId];
-            if (!item) return;
+            // Ensure the item exists in gameState.items
+            if (!gameState.items[itemId]) {
+                gameState.items[itemId] = { amountOwned: 0 };
+            }
 
+            const item = gameState.items[itemId];
             const price = item.priceFunction(item.amountOwned);
+
             if (gameState.numbers >= price) {
                 gameState.numbers -= price;
                 item.amountOwned += 1;
@@ -612,11 +615,10 @@
 
                 // Update the button text immediately
                 const newPrice = item.priceFunction(item.amountOwned);
-                item.buttonRef.textContent = `${item.name} = ${format(gameState.items[item.id].amountOwned)} - Price:  ${format(newPrice)} ℕ`;
+                item.buttonRef.textContent = `${item.name} = ${format(item.amountOwned)} - Price:  ${format(newPrice)} ℕ`;
             }
 
             MathJax.typeset();
-
         }
 
         // Update N per second calculations based on owned items
@@ -689,46 +691,91 @@
         }
 
 
+        // Save Game State to Local Storage
+        function saveGameState() {
+            localStorage.setItem('clickerGameSave', JSON.stringify(gameState));
+            console.log('Game saved.');
+        }
+
         // Load Game State from Local Storage
         function loadGameState() {
             const savedData = localStorage.getItem('clickerGameSave');
             if (savedData) {
                 const parsedData = JSON.parse(savedData);
-                gameState.numbers = parsedData.numbers || 0;
+                Object.assign(gameState, parsedData); // Merge the saved data into the current gameState
 
-                if (parsedData.items) {
-                    Object.keys(parsedData.items).forEach(itemId => {
-                        if (gameState.items[itemId]) {
-                            gameState.items[itemId].amountOwned = parsedData.items[itemId].amountOwned;
-                        }
-                    });
-                    gameState.unlocked = parsedData.unlocked || {sections: {}, tabs: {}, items: {} };
-                }
-
+                // Restore any necessary functions or properties
+                restoreGameStateFunctions();
 
                 updateNumbersPerSecond(); // Recalculate numbers per second based on loaded items
                 console.log('Game loaded.');
             }
         }
 
-        function resetGameState() {
-            const saveData = {
-                numbers: 20,
-                items: Object.keys(gameState.items).reduce((acc, itemId) => {
-                    acc[itemId] = {
-                        amountOwned: 0
-                    };
-                    return acc;
-                }, {})
-            };
-            localStorage.setItem('clickerGameSave', JSON.stringify(saveData));
-            loadGameState();
-            console.log('Game reset.');
+        // Function to restore missing functions in gameState after loading
+        function restoreGameStateFunctions() {
+            gameConfig.sections.forEach(section => {
+                section.tabs.forEach(tab => {
+                    tab.items.forEach(item => {
+                        if (!gameState.items[item.id]) {
+                            gameState.items[item.id] = { amountOwned: 0 }; // Ensure the item exists in gameState
+                        }
+                        // Reassign functions
+                        gameState.items[item.id].priceFunction = item.priceFunction;
+                        gameState.items[item.id].nPerSecondFunction = item.nPerSecondFunction;
+                    });
+                });
+            });
         }
+
+
 
         function numbersXten() {
             gameState.numbers *= 10;
         }
+
+        function resetGameState() {
+            gameState = {
+                numbers: 20,  // Reset to initial numbers
+                totalNumbers: 20,  // Reset to initial total numbers
+                totalNumberAtLastBookWriting: 0,  // Reset this value
+                numbersPerSecond: 0,  // Reset production rate
+                multiplier: 1,  // Reset multiplier
+                axioms: 0,  // Reset axioms
+                writingUnlocked: false,  // Reset writing state
+                firstBookIsWritten: false,  // Reset book writing state
+                sections: {},  // Reset unlocked sections
+                tabs: {},  // Reset unlocked tabs
+                items: {},  // Reset items
+                books: {},  // Reset books or other items
+                activeSection: null,  // Reset active section
+                activeTab: null,  // Reset active tab
+                unlocked: {
+                    sections: {},  // Ensure unlocked sections is initialized
+                    tabs: {},  // Ensure unlocked tabs is initialized
+                    items: {}  // Ensure unlocked items is initialized
+                }
+            };
+
+            // Initialize items from the gameConfig
+            gameConfig.sections.forEach(section => {
+                section.tabs.forEach(tab => {
+                    tab.items.forEach(item => {
+                        gameState.items[item.id] = { 
+                            amountOwned: 0, 
+                            priceFunction: item.priceFunction,
+                            nPerSecondFunction: item.nPerSecondFunction
+                        };
+                    });
+                });
+            });
+
+            saveGameState();  // Optionally save the reset state
+            renderGame();  // Optionally re-render the game with the reset state
+            console.log('Game state has been reset.');
+        }
+
+
 
 
         function initializeGameState() {
