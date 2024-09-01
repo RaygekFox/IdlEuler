@@ -613,13 +613,18 @@
                 updateNumbersPerSecond();
                 updateNumberDisplay();  // Update display immediately after purchase
 
+                // Extract the existing item name from the button text, assuming it follows the format "name = amountOwned - Price: price ℕ"
+                const currentText = item.buttonRef.textContent;
+                const itemName = currentText.split(' = ')[0];  // Extract the part before " = "
+
                 // Update the button text immediately
                 const newPrice = item.priceFunction(item.amountOwned);
-                item.buttonRef.textContent = `${item.name} = ${format(item.amountOwned)} - Price:  ${format(newPrice)} ℕ`;
+                item.buttonRef.textContent = `${itemName} = ${format(item.amountOwned)} - Price:  ${format(newPrice)} ℕ`;
             }
 
             MathJax.typeset();
         }
+
 
         // Update N per second calculations based on owned items
         function updateNumbersPerSecond() {
