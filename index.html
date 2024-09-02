@@ -35,6 +35,7 @@
             gap: 20px;
             border: 4px solid black;
             box-sizing: border-box;
+            overflow-y: auto;
         }
 
         #left-sidebar h1 {
@@ -136,7 +137,10 @@
         .book-container {
             position: relative; 
             width: 220px;
+            height: 320px;
             margin: 20px;
+            flex-shrink: 0; /* Prevent the container from shrinking */
+            flex-basis: 220px; /* Ensure that each container takes up enough space */
         }
 
         .front-cover {
@@ -149,6 +153,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            text-align: center;
             flex-direction: column;
         }
 
@@ -597,8 +602,6 @@
                     });
 
                     //Creating a book
-
-                                        
                     let bookTitle = '';
                     bookTitle += bookTitles.partOne[Math.floor(Math.random() * bookTitles.partOne.length)];
                     bookTitle += bookTitles.partTwo[Math.floor(Math.random() * bookTitles.partTwo.length)];
@@ -607,34 +610,8 @@
                     
                     gameState.books.push(bookTitle);
 
-
-                    renderBooks();
-
-                    //Create a new book
-                    let newBook = document.createElement('div');
-                    newBook.className = 'book-container';
-                    document.getElementById('library-container').appendChild(newBook);
-
-                    let backCover = document.createElement('div');
-                    backCover.className = 'back-cover';
-                    newBook.appendChild(backCover);
-
-                    let pages = document.createElement('div');
-                    pages.className = 'pages';
-                    newBook.appendChild(pages);
-
-                    let frontCover = document.createElement('div');
-                    frontCover.className = 'front-cover';
-                    newBook.appendChild(frontCover);
-
-
-
-                    frontCover.textContent = bookTitle;
-
-                    document.getElementById('library-container').appendChild(newBook);
-                    
-
                     //Render functions
+                    renderBooks();
                     saveGameState();
                     loadGameState();
                     renderGame();
@@ -746,7 +723,7 @@
         function renderBooks() {
 
         document.getElementById('library-container').innerHTML = '';
-        let bookIndex = gameState.books.length - 1;
+        let bookIndex = gameState.books.length;
         for (let i = 0; i < bookIndex; i++) {
 
             //Create a new book
@@ -927,7 +904,7 @@
                 sections: {},  // Reset unlocked sections
                 tabs: {},  // Reset unlocked tabs
                 items: {},  // Reset items
-                books: {},  // Reset books or other items
+                books: [],  // Reset books or other items
                 activeSection: null,  // Reset active section
                 activeTab: null,  // Reset active tab
                 unlocked: {
@@ -949,6 +926,11 @@
                     });
                 });
             });
+
+            const libraryContainer = document.getElementById('library-container');
+            libraryContainer.style.display = 'none';
+
+
 
             saveGameState();  // Optionally save the reset state
             renderGame();  // Optionally re-render the game with the reset state
