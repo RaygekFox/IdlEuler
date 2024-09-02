@@ -107,6 +107,19 @@
             z-index: 1;
         }
 
+        .hover-modal {
+            display: none; /* Hidden by default */
+            position: absolute;
+            width: max-content;
+            padding: 10px;
+            border: 1px solid black;
+            background-color: white;
+            box-sizing: border-box;
+            z-index: 1000; /* Make sure it's above other elements */
+            pointer-events: none; /* Prevent the modal from interfering with mouse events */
+        }
+
+
         #right-content {
             flex-grow: 1;
             display: flex;
@@ -500,7 +513,7 @@
                 "Theoretical ",
                 "Practical ",
                 "Brief ",
-                "Comrehensive ",
+                "Comprehensive ",
                 "Abstract ",
                 "Basic ",
                 "Advanced "
@@ -618,6 +631,9 @@
 
                 };
 
+                hoverModal(writeBookButton, 'You combine all the knowledge you got into a book and reset your progress. But you get some axioms to prove some poverful theorems.');
+                                
+
                 // Library button
                 const libraryButton = document.createElement('div');
                 libraryButton.className = 'section-btn';
@@ -680,7 +696,6 @@
                 }
             }
         }
-
 
         function renderItems(tabId) {
             const tab = gameConfig.sections.flatMap(section => section.tabs).find(t => t.id === tabId);
@@ -749,6 +764,33 @@
         };
         }
 
+        function hoverModal(buttonElement, title) {
+            let hoverModal = document.querySelector('.hover-modal');
+
+            if (!hoverModal) {
+                // Create the hover modal if it doesn't exist
+                hoverModal = document.createElement('div');
+                hoverModal.className = 'hover-modal';
+                document.body.appendChild(hoverModal); // Append modal to the body
+            }
+
+            // Set the modal's content
+            hoverModal.textContent = title;
+
+            // Event listeners to handle hover modal visibility and positioning
+            buttonElement.addEventListener('mouseover', (event) => {
+                hoverModal.style.display = 'block';
+            });
+
+            buttonElement.addEventListener('mousemove', (event) => {
+                hoverModal.style.left = event.pageX + 10 + 'px'; // Positioning 10px to the right of the cursor
+                hoverModal.style.top = event.pageY + 10 + 'px'; // Positioning 10px below the cursor
+            });
+
+            buttonElement.addEventListener('mouseout', () => {
+                hoverModal.style.display = 'none';
+            });
+        }
 
         function buyItem(itemId) {
             // Ensure the item exists in gameState.items
@@ -777,7 +819,6 @@
             MathJax.typeset();
         }
 
-
         // Update N per second calculations based on owned items
         function updateNumbersPerSecond() {
             updateMultiplier();
@@ -796,7 +837,6 @@
             console.log(gameState.numbersPerSecond);
         }
 
-
         function updateMultiplier() {
             gameState.multiplier = gameConfig.sections.flatMap(section => section.tabs)
                 .flatMap(tab => tab.items)
@@ -809,7 +849,6 @@
             console.log("gameState.multiplier");
             console.log(gameState.multiplier);
         }
-
 
         // Update Display
         function updateNumberDisplay() {
@@ -830,7 +869,7 @@
             return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
         }
 
-
+        /*
         // Save Game State to Local Storage
         function saveGameState() {
             const saveData = {
@@ -846,7 +885,7 @@
             localStorage.setItem('clickerGameSave', JSON.stringify(saveData));
             console.log('Game saved.');
         }
-
+        */
 
         // Save Game State to Local Storage
         function saveGameState() {
@@ -884,8 +923,6 @@
                 });
             });
         }
-
-
 
         function numbersXten() {
             gameState.numbers *= 10;
@@ -936,9 +973,6 @@
             renderGame();  // Optionally re-render the game with the reset state
             console.log('Game state has been reset.');
         }
-
-
-
 
         function initializeGameState() {
             gameConfig.sections.forEach(section => {
